@@ -1,0 +1,332 @@
+@font-face {
+    font-family: 'future';
+    src: url('Orbitron.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Optionnel : gestion du chargement */
+}
+
+@font-face {
+    font-family: 'Exo';
+    src: url('Exo.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; 
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'future', Arial, sans-serif;
+    
+
+}
+body {
+    background: linear-gradient(135deg, #0f0c29, #393479, #24243e);
+    background-size: 300% 300%;
+    animation: gradientAnimation 8s infinite alternate ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.entet {
+    background: linear-gradient(135deg, #302b63, #503a9a, #5e4fba);
+    background-size: 300% 300%;
+    box-shadow: 0px 0px 15px rgba(100, 100, 255, 0.5);
+    border-bottom: 1px solid rgba(100, 100, 255, 0.3);
+    animation: gradientAnimation 8s infinite alternate ease-in-out;
+    border-radius: 0 0 11px 11px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    & 
+    #part1 {
+        display: flex;
+        align-items: center;
+        
+
+        &
+
+        #logo {
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            transition: ease-in-out 0.1s;
+        }
+
+        #logo:hover {
+            transform: scale(0.7);
+        }
+    
+        h5 {
+            color: #fff;
+                cursor: pointer;
+                font-size: 12px;
+                padding: 7px;
+    
+        }
+
+        h5:hover {
+            transform: scale(0.9);
+
+        }
+    
+      
+    }
+
+    #part2 {
+        font-size: 11px;
+        display: flex;
+        flex-direction: row;
+        &
+        a {
+            margin: 6px;
+            color: #fff;
+            text-decoration: none;
+            background: #302b63;
+            padding: 6px;
+            border-radius: 7px;
+            transition: ease-in-out 0.2s;
+        }
+
+        a:hover {
+            background: #645dae;
+            transform:scale(1.1);
+        }
+
+    }
+
+}
+
+/* Section du bouton de minage */
+.mining-section {
+    display: flex;
+    align-items: center; /* Centre les éléments verticalement */
+    padding: 20px; /* Ajoute un espace autour du contenu */
+    width: 100%; /* Assure que la div prend toute la largeur disponible */
+    box-sizing: border-box; /* Inclut le padding dans la largeur */
+    background: #3e3783;
+    margin-top: 20px;
+    border-radius: 22px;
+}
+
+.start {
+    display: flex;
+    align-items: center; /* Centre les éléments verticalement */
+}
+
+.genral {
+    margin-left: 41px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px; /* Ajoute un espace entre les éléments enfants */
+}
+
+#time-txt, #timee-txt, #token-txt, #tokenn-txt {
+    font-family: 'Exo', Arial, sans-serif;
+    color: #fff;
+    margin: 0; /* Supprime les marges par défaut des paragraphes */
+}
+
+.carte {
+    width: 50px;
+    cursor: pointer;
+    margin: 0 10px; /* Ajoute un espace entre les images */
+}
+
+.carte:hover {
+    transform: scale(1.08);
+}
+
+.carte:active {
+    transform: scale(0.8);
+}
+
+.catre-utiliser {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.start {
+    display: flex;
+    align-items: center; /* Centre les éléments verticalement */
+}
+
+.genral {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 10px;
+}
+
+#time-txt, #timee-txt, #token-txt, #tokenn-txt, #bonus-txt, #bonuss-txt, #recolt-txt, #recoltt-txt, #timer-txt, #timeer-txt {
+    font-family: 'Exo', Arial, sans-serif;
+    color: #fff;
+}
+
+#timee-txt, #tokenn-txt, #bonuss-txt, #recoltt-txt, #timeer-txt {
+    color: #00c8ff;
+}
+
+.carte {
+    width: 50px;
+    cursor: pointer;
+}
+
+.carte:hover {
+    transform: scale(1.08);
+}
+
+.carte:active {
+    transform: scale(0.8);
+}
+
+.catre-utiliser {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 20px;
+}
+
+.time1, .time, .token, .bonus, .recolt {
+    display: flex;
+}
+
+
+/* Conteneur de la barre de progression circulaire */
+.progress-circle {
+    position: relative;
+    width: 157px;
+    height: 157px;
+    border-radius: 50%; /* Forme circulaire */
+    background: #302b63; /* Fond statique derrière la barre */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Cache les débordements */
+}
+
+/* Masque pour la barre de progression */
+.progress-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(#1a183c 0%, transparent 0%); /* Progression initiale (vide) */
+    transform: rotate(-90deg); /* Alignement initial */
+    transition: background 0.1s linear; /* Animation fluide */
+}
+
+/* Bouton principal (cercle) */
+.mining-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%; /* Forme circulaire */
+    background: linear-gradient(145deg, #393479, #463be1); /* Gradient rouge-orange */
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 1; /* Place le bouton au-dessus de la barre de progression */
+}
+
+/* Animation au survol */
+.mining-button:hover {
+    transform: scale(1.05); /* Légère augmentation de taille */
+    box-shadow: 0 15px 40px #1a183c; /* Ombre plus prononcée */
+}
+
+/* Effet de clic */
+.mining-button:active {
+    transform: scale(0.95); /* Réduction légère lors du clic */
+    box-shadow: 0 5px 15px #1a183c; /* Ombre réduite */
+}
+
+/* Overlay qui couvre toute la page */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: none;
+    padding: 20px;
+    z-index: 1000; 
+
+    #tit {
+        color: #fff;
+        padding: 4px;
+        font-family: 'exo', Arial, sans-serif;
+        border: 1px solid #00d9ff;
+    }
+
+    .carte-box {
+        display: none;
+    }
+    
+}
+
+.overlay1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: none;
+    padding: 20px;
+    z-index: 1000; 
+    justify-content: center;
+    flex-direction: column;   
+}
+
+.loader-container {
+    text-align: center;
+    position: relative;
+  }
+
+  /* Animation circulaire */
+  .loader-circle {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #3498db; /* Couleur principale */
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    margin: 0 auto;
+  }
+  .loader-text {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #fff; /* Changement de la couleur du texte en blanc */
+    font-weight: bold;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+
+  

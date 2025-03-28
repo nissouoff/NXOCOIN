@@ -1,0 +1,294 @@
+@font-face {
+    font-family: 'future';
+    src: url('Orbitron.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Optionnel : gestion du chargement */
+}
+
+@font-face {
+    font-family: 'Exo';
+    src: url('Exo.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; 
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0); /* Position initiale et finale */
+    }
+    50% {
+        transform: translateY(-8px); /* Déplacer l'image vers le haut */
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'future', Arial, sans-serif;
+    
+
+}
+body {
+    background: linear-gradient(135deg, #0f0c29, #393479, #24243e);
+    background-size: 300% 300%;
+    animation: gradientAnimation 8s infinite alternate ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #1919a830;
+        height: 440px;
+        width: 300px;
+        border-radius: 11px;
+        border: 1px solid #fff;
+        box-shadow: 20px 10px 20px 10px #00000036;
+        transition: all 0.2s;
+        animation: float 2s ease-in-out infinite;
+    
+    &
+
+    #logo {
+        width: 70px;
+    }
+
+    .part {
+        display: flex;
+        flex-direction: column;
+        height: 156px;
+    }
+
+    .part1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 78px;
+        transition: opacity 0.5s ease, display 0.5s ease;
+
+    }
+
+    .login1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        &
+        input {
+            height: 30px;
+            margin: 3px;
+            width: 250px;
+            border: none;
+            outline: none;
+            padding: 5px;
+            border-radius: 6px;
+            font-family: 'exo', Arial, sans-serif;
+        }
+
+        input:hover {
+            transform: scale(1.02);
+        }
+    }
+
+    .login2 {
+        width: 300px;
+        display: flex;
+        align-items: end;
+        flex-direction: column;
+        padding-right: 50px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #00ffff;
+        cursor: pointer;
+        height: 100px;
+        &
+        span {
+            font-family: 'exo', Arial,sans-serif;
+        }
+    }
+
+    .login3 {
+        margin-top: 53px;
+        &
+        #login-btn {
+            width: 220px;
+            height: 30px;
+            border-radius: 9px;
+            border: 1px solid #fff;
+            background: #8512ff;
+            cursor: pointer;
+            color: #fff;
+            font-family: 'exo', Arial, sans-serif;
+        }
+
+        #login-btn:hover {
+            background: #804fb3;
+            transform: scale(1.07);
+        }
+    }
+
+    .login4 {
+        font-size: 13px;
+        margin-top: 80px;
+        display: flex;
+        align-items: center;
+
+        &
+
+        #singup-txt, a {
+            font-family: 'exo', Arial, sans-serif;
+            color: #fff;
+        }
+
+        a {
+            color: #00ffff;
+        }
+    }
+
+    .part2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        transition: opacity 0.5s ease, display 0.5s ease;
+
+
+        &
+
+        .singup1 {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        &
+
+        input {
+            height: 30px;
+            margin: 3px;
+            width: 250px;
+            border: none;
+            outline: none;
+            padding: 5px;
+            border-radius: 6px;
+            font-family: 'exo', Arial, sans-serif;
+            }
+        
+        input:hover {
+            transform: scale(1.02);
+        }
+
+        }
+
+        .singup2 {
+            margin-top: 20px;
+            
+            &
+            #singup-btn {
+            width: 220px;
+            height: 30px;
+            border-radius: 9px;
+            border: 1px solid #fff;
+            background: #8512ff;
+            cursor: pointer;
+            color: #fff;
+            font-family: 'exo', Arial, sans-serif;
+            }
+
+            #singup-btn:hover {
+                background: #804fb3;
+                transform: scale(1.07);
+            }
+
+        }
+
+        .singup3 {
+            margin-top: 20px;
+            font-size: 13;
+            &
+            #login-txt, a {
+                font-family: 'exo', Arial, sans-serif;
+                color: #fff;
+            }
+    
+            a {
+                color: #00ffff;
+            }
+        }
+       
+    }
+    
+}
+
+#error {
+    color: red;
+    font-family: 'exo', Arial,  sans-serif;
+    font-size: 13px;
+    position: fixed;
+    top: 110px;
+    left: 50px;
+    display: none;
+}
+
+ /* Animation pour rendre la transition fluide */
+ @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: none;
+    padding: 20px;
+    z-index: 1000; 
+    justify-content: center;
+    flex-direction: column;
+}
+.loader-container {
+    text-align: center;
+    position: relative;
+  }
+
+  /* Animation circulaire */
+  .loader-circle {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #3498db; /* Couleur principale */
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    margin: 0 auto;
+  }
+  .loader-text {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #fff; /* Changement de la couleur du texte en blanc */
+    font-weight: bold;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
