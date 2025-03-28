@@ -87,6 +87,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 
 
 // ✅ Inscription
+// ✅ Inscription
 document.getElementById('singup-btn').addEventListener('click', async () => {
     const name = document.getElementById('name-singup').value.trim();
     const username = document.getElementById('username-singup').value.trim();
@@ -97,8 +98,6 @@ document.getElementById('singup-btn').addEventListener('click', async () => {
     const overview = document.querySelector('.overlay');
     
     overview.style.display = "flex";
-
-
     errorElement.textContent = ""; // Effacer les erreurs précédentes
 
     if (!name || !username || !email || !password || !confirmPassword) {
@@ -115,6 +114,7 @@ document.getElementById('singup-btn').addEventListener('click', async () => {
     }
 
     try {
+        // Étape 1 : Inscription via le backend
         const res = await fetch('/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -123,14 +123,21 @@ document.getElementById('singup-btn').addEventListener('click', async () => {
 
         const data = await res.json();
         if (!data.success) throw new Error(data.message);
-        errorElement.style.display = "none";
 
-        window.location.href = "main.html"; // ✅ Rediriger après inscription réussie
+        // Étape 2 : Connexion automatique avec Firebase
+        await firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(() => {
+                errorElement.style.display = "none";
+                window.location.replace("main.html"); // Rediriger après connexion réussie
+            })
+            .catch((error) => {
+                throw new Error("Erreur lors de la connexion automatique : " + error.message);
+            });
+
     } catch (error) {
         errorElement.textContent = `❌ ${error.message}`;
         errorElement.style.display = "block";
         overview.style.display = "none";
-
     }
 });
 
