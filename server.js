@@ -5,7 +5,7 @@ const path = require('path');
 const NodeCache = require('node-cache'); // Ajout de cache local
 
 // Initialisation de Firebase Admin
-const serviceAccount = require('./ab.json');
+const serviceAccount = require('./abb.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://infofoot-32892-default-rtdb.firebaseio.com'
