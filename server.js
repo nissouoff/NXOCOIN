@@ -1,23 +1,27 @@
 const express = require('express');
 const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
 const cors = require('cors');
 const path = require('path');
-const NodeCache = require('node-cache'); // Ajout de cache local
+const NodeCache = require('node-cache');
+
+// Initialisation d'Express
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Initialisation de Firebase Admin
-const serviceAccount = require('./abb.json');
+const serviceAccount = require('./abcb.json'); // Assure-toi que le chemin est correct
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://infofoot-32892-default-rtdb.firebaseio.com'
 });
 
-const app = express();
 const db = admin.database();
 const auth = admin.auth();
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 }); // Cache avec TTL de 60s
 
 // Middleware
-app.use(express.json({ limit: '10kb' })); // Limiter la taille des requêtes
+app.use(express.json({ limit: '10kb' }));
 app.use(cors({ origin: true, methods: ['GET', 'POST'] }));
 app.use(express.static(path.join(__dirname, 'V1', 'main')));
 app.use(express.static(path.join(__dirname, 'V1', 'css')));
@@ -25,10 +29,18 @@ app.use(express.static(path.join(__dirname, 'V1', 'js')));
 app.use(express.static(path.join(__dirname, 'V1', 'res')));
 app.use(express.static(path.join(__dirname, 'V1', 'fonts')));
 
+// Configuration de Nodemailer (exemple avec Gmail)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'nissoulintouchable@gmail.com', // Ton adresse Gmail
+        pass: 'zjkv thjb qiln ffaq' // Mot de passe d'application Gmail
+    }
+});
+
 // Constants
-const MINING_DURATION = 3 * 60 * 1000; // 3 heures en ms
+const MINING_DURATION = 3 * 60 * 60 * 1000; // 3 heures en ms
 const SECONDS_IN_3H = 3 * 60 * 60; // 10 800 secondes
-const PORT = process.env.PORT || 3000;
 
 // Middleware d'authentification
 const authenticateUser = async (req, res, next) => {
@@ -74,6 +86,108 @@ const updateMiningStats = async (userId) => {
 
     return { totalPower, totalBonus };
 };
+
+// Fonction pour envoyer un email de fin de minage
+async function sendMiningEndEmail(userId, email) {
+    const mailOptions = {
+        from: '"Nxo Mining Team" <nissoulintouchable@gmail.com>',
+        to: email,
+        subject: 'Your Mining Session Has Ended',
+        html: `
+            <h2>Mining Session Completed</h2>
+            <p>Dear User,</p>
+            <p>We are pleased to inform you that your mining session has successfully concluded on <strong>${new Date().toLocaleString()}</strong>.</p>
+            <p><strong>Mining Details:</strong></p>
+            <ul>
+                <li>User ID: ${userId}</li>
+                <li>Completion Time: ${new Date().toLocaleString()}</li>
+            </ul>
+            <p>Your mined NXO has been updated in your account. You can now collect your rewards and start a new mining session if desired.</p>
+            <p>Thank you for using our mining platform. If you have any questions, feel free to contact us at <a href="mailto:support@nxomining.com">support@nxomining.com</a>.</p>
+            <p>Best regards,<br>The Nxo Mining Team</p>
+            <footer style="font-size: 12px; color: #777;">
+                <p>This is an automated message. Please do not reply directly to this email.</p>
+            </footer>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Email envoyé à ${email} pour la fin du minage de ${userId}`);
+    } catch (error) {
+        console.error(`❌ Erreur lors de l'envoi de l'email à ${email} :`, error);
+    }
+}
+
+// Fonction pour vérifier et gérer le minage (de l'ancien server.js)
+async function checkMining() {
+    console.log("🔍 Vérification du minage...");
+    const miningStartRef = db.ref('MiningStart');
+    const snapshot = await miningStartRef.once('value');
+
+    if (!snapshot.exists()) return;
+
+    const now = Date.now();
+
+    snapshot.forEach(async (miningEntry) => {
+        const userId = miningEntry.key;
+        const miningData = miningEntry.val();
+
+        const nextMining = miningData.next || 0;
+        const total = miningData.total || 0;
+        const totalS = miningData.totalS || 0;
+
+        const userRef = db.ref(`Users/${userId}/mining`);
+        const userSnapshot = await userRef.once('value');
+
+        if (!userSnapshot.exists()) {
+            console.log(`❌ Erreur : Aucun chemin Users/${userId}/mining trouvé`);
+            return;
+        }
+
+        const userData = userSnapshot.val();
+        let currentNxo = userData.NXO || 0;
+
+        if (now >= nextMining) {
+            console.log(`⛔ Minage terminé pour ${userId}`);
+            await miningStartRef.child(userId).update({ minage: 'off' });
+
+            if (total !== currentNxo) {
+                const difference = total - currentNxo;
+                if (difference > 0) {
+                    currentNxo += difference;
+                    await userRef.update({ NXO: currentNxo });
+                    console.log(`✅ NXO ajusté pour ${userId} : ${currentNxo}`);
+                }
+            }
+
+            const persoRef = db.ref(`Users/${userId}/perso`);
+            const persoSnapshot = await persoRef.once('value');
+            const persoData = persoSnapshot.val();
+            const userEmail = persoData?.email;
+
+            if (userEmail) {
+                await sendMiningEndEmail(userId, userEmail);
+            } else {
+                console.log(`⚠️ Aucun email trouvé pour ${userId}`);
+            }
+
+            await miningStartRef.child(userId).remove();
+            console.log(`🗑️ Entrée MiningStart/${userId} supprimée`);
+        } else {
+            console.log(`⛏️ Mise à jour NXO pour ${userId}`);
+            const gainPerInterval = totalS / (3600 / 5); // Gain toutes les 5 secondes (1h = 3600s)
+            currentNxo += gainPerInterval;
+            await userRef.update({ NXO: currentNxo });
+            console.log(`✅ Ajout de ${gainPerInterval.toFixed(6)} NXO à ${userId} (Total: ${currentNxo.toFixed(6)})`);
+        }
+    });
+}
+
+// Exécuter la vérification toutes les 5 secondes
+setInterval(() => {
+    checkMining();
+}, 5000);
 
 // Routes statiques
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'V1', 'main', 'landing.html')));
@@ -132,7 +246,6 @@ app.post('/login', async (req, res) => {
 
 app.post('/logout', (req, res) => res.json({ success: true }));
 
-// Routes unifiées pour le minage
 app.get('/mining-data/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
@@ -143,7 +256,6 @@ app.get('/mining-data/:userId', async (req, res) => {
     }
 });
 
-// Dans server.js, après app.post('/start-mining/:userId', ...)
 app.post('/start-mining/:userId', authenticateUser, async (req, res) => {
     const { userId } = req.params;
     if (userId !== req.userId) return res.status(403).json({ error: 'Unauthorized' });
@@ -164,35 +276,31 @@ app.post('/start-mining/:userId', authenticateUser, async (req, res) => {
             return res.status(400).json({ error: 'Minage déjà en cours' });
         }
 
-        // Étape 1 : Récupérer les cartes et calculer la puissance totale
         const cardsSnapshot = await cardsRef.once('value');
         const cardsData = cardsSnapshot.val() || {};
         let totalPower = 0;
 
         Object.values(cardsData).forEach(card => {
-            if (card.active === 1) { // Considérer uniquement les cartes actives
+            if (card.active === 1) {
                 totalPower += card.puissance || 0;
             }
         });
 
-        // Étape 2 : Récupérer bonus existant
         const bonus = miningData.bonus || 0;
         const total = totalPower + bonus;
-        const gainPer5Seconds = total / (3600 / 5); // Gain par intervalle de 5 secondes
+        const gainPer5Seconds = total / (3600 / 5);
 
-        // Étape 3 : Mettre à jour MiningStart
         await miningStartRef.set({
             total: total,
             totalS: total,
             next: now + nextMiningDuration
         });
 
-        // Étape 4 : Mettre à jour Users/${userId}/mining avec la nouvelle puissance
         const newMiningData = {
             'last-mining': now,
             'next-mining': now + nextMiningDuration,
             NXO: 0,
-            'puissance-mining': totalPower, // Nouvelle valeur calculée depuis cards
+            'puissance-mining': totalPower,
             bonus: bonus,
             carte: miningData.carte || 1
         };
@@ -200,20 +308,6 @@ app.post('/start-mining/:userId', authenticateUser, async (req, res) => {
         await miningRef.set(newMiningData);
         console.log(`Minage démarré pour userId: ${userId}`, newMiningData);
 
-        // Simulation de mise à jour de NXO toutes les 5 secondes
-        let currentNxo = 0;
-        const interval = setInterval(async () => {
-            const currentTime = Date.now();
-            if (currentTime >= now + nextMiningDuration) {
-                clearInterval(interval);
-                return;
-            }
-            currentNxo += gainPer5Seconds;
-            await miningRef.update({ NXO: currentNxo });
-            console.log(`NXO mis à jour pour ${userId}: ${currentNxo}`);
-        }, 5000);
-
-        // Invalider le cache
         cache.del(`mining_${userId}`);
 
         res.json({
@@ -236,34 +330,23 @@ app.post('/collect-nxo/:userId', authenticateUser, async (req, res) => {
 
     try {
         console.log(`Début collecte pour userId: ${userId}`);
-
-        // Étape 1 : Récupérer les données actuelles
         const miningSnapshot = await miningRef.once('value');
         const miningData = miningSnapshot.val() || {};
         const nxo = miningData.NXO || 0;
-        console.log(`NXO à collecter: ${nxo}`);
 
         if (nxo <= 0) return res.status(400).json({ error: 'Aucun NXO à collecter' });
 
         const persoSnapshot = await persoRef.once('value');
         const persoData = persoSnapshot.val() || {};
         const currentNxoCoin = persoData.NxoCoin || 0;
-        console.log(`Current NxoCoin: ${currentNxoCoin}`);
 
-        // Étape 2 : Calculer et mettre à jour NxoCoin dans Users/${userId}/perso/
         const updatedNxoCoin = currentNxoCoin + nxo;
         await persoRef.update({ NxoCoin: updatedNxoCoin });
-        console.log(`NxoCoin mis à jour dans Users/${userId}/perso/: ${updatedNxoCoin}`);
-
-        // Étape 3 : Mettre à jour NXO à 0 dans mining
         await miningRef.update({ NXO: 0 });
-        console.log(`NXO remis à 0 dans Users/${userId}/mining/`);
 
-        // Invalider le cache
         cache.del(`mining_${userId}`);
         cache.del(`perso_${userId}`);
 
-        // Étape 4 : Renvoyer la réponse avec updatedNxoCoin
         res.json({
             success: true,
             message: 'NXO collecté',
@@ -283,14 +366,12 @@ app.get('/cards/:userId', async (req, res) => {
             .filter(([_, card]) => card.active === 1)
             .map(([key, card]) => ({ key, ...card }));
 
-        // Suppression de la vérification et désactivation des cartes
         res.json({ success: true, activeCards });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// Fusion des routes bonus et puissance
 app.post('/update-mining-stats/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
@@ -302,9 +383,14 @@ app.post('/update-mining-stats/:userId', async (req, res) => {
     }
 });
 
+// Route pour ping (garder le serveur éveillé)
+app.get('/ping', (req, res) => {
+    res.json({ success: true, message: 'Server is alive' });
+});
+
 // Démarrer le serveur
 app.listen(PORT, () => {
-    console.log(`Serveur démarré sur http://localhost:${PORT}`);
+    console.log(`🌍 Serveur démarré sur http://localhost:${PORT}`);
 });
 
 // Gestion des erreurs globales
