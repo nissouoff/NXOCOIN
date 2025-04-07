@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialisation de Firebase Admin
-const serviceAccount = require('./abcb.json'); // Assure-toi que le chemin est correct
+const serviceAccount = require('.key.json'); // Assure-toi que le chemin est correct
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://infofoot-32892-default-rtdb.firebaseio.com'
